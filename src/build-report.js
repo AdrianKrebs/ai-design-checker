@@ -46,6 +46,7 @@ const sites = ok.map(r => {
     title: meta?.title || r.url,
     hnId: meta?.id || null,
     points: meta?.points || null,
+    postedAt: meta?.createdAt || null,
     score: r.score,
     tier: r.tierLabel || r.tier,
     flagged: (r.patterns || []).filter(p => p.triggered).map(p => p.id),
@@ -197,6 +198,7 @@ function renderGrid() {
     const hnLink = s.hnId
       ? \`<a class="hn-link" href="https://news.ycombinator.com/item?id=\${s.hnId}" target="_blank" rel="noopener" title="HN discussion">HN ↗</a>\`
       : '';
+    const posted = s.postedAt ? formatDate(s.postedAt) : '';
     const pats = s.flagged.map(id => \`<span class="pat">\${escape(patternLabel[id] || id)}</span>\`).join('');
     const shotBase = data.cdnBase || 'screenshots';
     const shot = data.noImages
@@ -214,6 +216,7 @@ function renderGrid() {
     <div class="score-row">
       <span class="score-num">\${s.score}</span> / 100 ·
       <span>\${s.flagged.length}/\${s.total} patterns</span>
+      \${posted ? '· <span title="Posted on HN">' + posted + '</span>' : ''}
       \${hnLink}
     </div>
     \${pats ? '<div class="patterns">' + pats + '</div>' : ''}
@@ -224,6 +227,14 @@ function renderGrid() {
 
 function escape(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+function formatDate(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  // "Apr 19" if same year as now, else "Apr 19, 2025"
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const sameYear = d.getFullYear() === new Date().getFullYear();
+  return months[d.getMonth()] + ' ' + d.getDate() + (sameYear ? '' : ', ' + d.getFullYear());
 }
 
 document.getElementById('tiers').addEventListener('click', e => {

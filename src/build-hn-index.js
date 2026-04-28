@@ -35,7 +35,13 @@ while (totalPages < 60) {
     if (!hit.url || !hit.objectID) continue;
     if (!wanted.has(hit.url)) continue;
     if (!map[hit.url]) {
-      map[hit.url] = { id: hit.objectID, title: hit.title, points: hit.points, author: hit.author };
+      map[hit.url] = {
+        id: hit.objectID,
+        title: hit.title,
+        points: hit.points,
+        author: hit.author,
+        createdAt: hit.created_at || (hit.created_at_i ? new Date(hit.created_at_i * 1000).toISOString() : null)
+      };
       added++;
     }
   }

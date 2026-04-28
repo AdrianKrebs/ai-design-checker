@@ -1,0 +1,18 @@
+{
+  "name": "ai-design-scorer",
+  "version": "0.1.0",
+  "description": "Score landing pages against common AI design patterns",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "analyze": "node src/run.js",
+    "fetch":   "node src/fetch-showhn.js",
+    "report":  "node src/build-report.js",
+    "label":   "node tools/label/server.mjs",
+    "scan":    "node tools/scan/server.mjs",
+    "eval":    "node tools/eval.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

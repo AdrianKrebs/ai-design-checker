@@ -10,30 +10,51 @@ Manual verification across ~150 labeled sites suggests ~5–10% false positives.
 
 ![Browseable results report — tier filters, pattern frequency, and a card grid of every analyzed site](docs/report.png)
 
-## Quick start
-
-Requires Node 18+ and ~1 GB free for the bundled Chromium.
+## Run on one URL (CLI)
 
 ```bash
+npx playwright install chromium     # one-time, ~200 MB
+npx ai-design-checker https://example.com
+```
+
+```
+https://example.com
+Mild · score 25/100 · 4/16 patterns
+
+Triggered:
+  • Gradients
+  • Centered + Inter
+  • Eyebrow pill
+  • FAQ
+```
+
+`--json` for machine-readable output. Requires Node 18+.
+
+## Use as a Claude Code skill
+
+Drop `~/.claude/plugins/ai-design-checker/` (or use Claude Code's plugin marketplace once published) and ask Claude things like *"score example.com for AI design patterns"* or *"how templated does acme.io look?"*. The skill calls the CLI and summarises the verdict.
+
+Source: [`skills/check-design/SKILL.md`](skills/check-design/SKILL.md) · plugin manifest: [`.claude-plugin/plugin.json`](.claude-plugin/plugin.json)
+
+## Run the full corpus
+
+For batch analysis (e.g. the bundled `urls.txt` with ~1000 Show HN posts):
+
+```bash
+git clone https://github.com/AdrianKrebs/ai-design-checker
+cd ai-design-checker
 npm install
 npx playwright install chromium
 
-# Try one URL — takes ~10 s
-node src/run.js --url=https://example.com
-
-# Or run the full bundled list (urls.txt, ~900 Show HN posts)
-npm run analyze
-
-# Faster: 4 URLs in parallel — ~25 min vs ~100 min sequential, ~600 MB RAM
-node src/run.js --concurrency=4
+npm run analyze                      # sequential, ~100 min for 1k URLs
+node src/run.js --concurrency=4      # 4 parallel, ~25 min, ~600 MB RAM
+node src/run.js --skip-existing      # only fetch URLs not yet cached
 ```
 
 Results go to `results/`:
 - `results/raw/<slug>.json` — per-URL signals + score
 - `results/screenshots/<slug>.png` — full-page screenshot
 - `results/all-results.json` — all scored entries combined
-
-Pass `--skip-existing` to skip URLs that already have a cached result.
 
 ## Patterns
 

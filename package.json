@@ -1,9 +1,21 @@
 {
   "name": "ai-design-checker",
   "version": "0.1.0",
-  "description": "Score landing pages against common AI design patterns",
+  "description": "Score landing pages against 16 deterministic AI design patterns",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/AdrianKrebs/ai-design-checker",
+  "repository": { "type": "git", "url": "https://github.com/AdrianKrebs/ai-design-checker.git" },
+  "bin": {
+    "ai-design-checker": "./src/cli.js"
+  },
+  "files": [
+    "src/",
+    ".claude-plugin/",
+    "skills/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "analyze": "node src/run.js",
     "fetch":   "node src/fetch-showhn.js",

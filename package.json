@@ -17,6 +17,8 @@
   ],
   "scripts": {
     "postinstall": "playwright install chromium",
+    "start":       "node web/server.mjs",
+    "web":         "node web/server.mjs",
     "analyze":     "node src/run.js",
     "fetch":       "node src/fetch-showhn.js",
     "report":      "node src/build-report.js",

@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Design Checker — score any site for AI design patterns</title>
+<meta name="description" content="Paste a URL. We load it in a real browser and score it against 15 deterministic AI design patterns — vibe purple, gradients, FAQ accordions, 1·2·3 steps, and more.">
+<meta property="og:title" content="AI Design Checker">
+<meta property="og:description" content="Score any website for common AI design patterns.">
+<style>
+  :root {
+    --bg: #f6f6ef;        /* HN beige */
+    --ink: #1a1a1a;
+    --muted: #666;
+    --line: #e0e0d8;
+    --accent: #ff6600;    /* HN orange */
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body { font: 15px/1.5 Verdana, Geneva, -apple-system, sans-serif; margin: 0; color: var(--ink); background: var(--bg); }
+  a { color: #1a4dba; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 16px 64px; }
+
+  header { background: var(--accent); padding: 10px 16px; }
+  header .inner { max-width: 920px; margin: 0 auto; display: flex; align-items: baseline; gap: 10px; }
+  header b { color: #000; font-size: 15px; }
+  header span { color: #1d1d1d; font-size: 12px; }
+
+  h1 { font-size: 24px; margin: 28px 0 6px; }
+  .lede { color: var(--muted); font-size: 14px; margin: 0 0 20px; max-width: 620px; }
+  .lede a { color: #1a4dba; }
+
+  .form { display: flex; gap: 8px; }
+  .form input { flex: 1; font: 15px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 11px 12px; border: 1px solid #bbb; border-radius: 5px; background: #fff; }
+  .form input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
+  .form button { font: 600 15px Verdana, sans-serif; padding: 0 22px; background: #000; color: #fff; border: 0; border-radius: 5px; cursor: pointer; }
+  .form button:hover:not(:disabled) { background: #333; }
+  .form button:disabled { background: #999; cursor: not-allowed; }
+
+  .examples { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+  .examples button { font: 12px ui-monospace, monospace; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; margin: 0 4px 4px 0; cursor: pointer; color: #333; }
+  .examples button:hover { border-color: #999; }
+
+  .status { min-height: 22px; margin: 16px 0 0; color: var(--muted); font-size: 13px; }
+  .status.error { color: #b03a2e; }
+  .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #ccc; border-top-color: #000; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; margin-top: 16px; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+  .shot { background: #fff; border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: 560px; cursor: zoom-in; }
+  .shot img { width: 100%; display: block; }
+  .shot.empty { display: flex; align-items: center; justify-content: center; min-height: 240px; color: #aaa; font-style: italic; cursor: default; }
+
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
+  .verdict { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+  .tier { font: 700 16px Verdana, sans-serif; padding: 6px 12px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
+  .tier.heavy { background: #fdecec; color: #8b1a1a; }
+  .tier.mild  { background: #fff3c4; color: #8a6500; }
+  .tier.clean { background: #e6f3e1; color: #2c7a3a; }
+  .score .num { font: 700 28px ui-monospace, monospace; }
+  .score .denom { color: var(--muted); font-size: 13px; }
+  .meta { color: var(--muted); font-size: 12px; margin-left: auto; text-align: right; }
+
+  h2 { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
+  .pattern { padding: 8px 10px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--line); font-size: 13px; }
+  .pattern.on { background: #fdecec; border-color: #f3c8c4; }
+  .pattern.off { color: #999; }
+  .pattern .head { display: flex; align-items: center; gap: 8px; }
+  .pattern .head strong { font-weight: 600; flex: 1; }
+  .pattern.off .head strong { font-weight: 400; }
+  .badge { font: 700 10px Verdana, sans-serif; padding: 2px 7px; border-radius: 3px; }
+  .badge.on { background: #c6310f; color: #fff; }
+  .badge.off { background: #eee; color: #999; }
+  .ev { color: #555; font-size: 12px; margin-top: 4px; }
+
+  .placeholder { color: #aaa; text-align: center; padding: 36px 16px; }
+  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+
+  .zoom { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: flex-start; justify-content: center; z-index: 99; cursor: zoom-out; padding: 24px; overflow: auto; }
+  .zoom.open { display: flex; }
+  .zoom img { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<header><div class="inner"><b>AI Design Checker</b><span>scores any site for common AI design patterns</span></div></header>
+
+<div class="wrap">
+  <h1>Is this site AI design slop?</h1>
+  <p class="lede">
+    Paste a URL. We load it in a real headless browser, analyze the DOM, and report which of
+    <strong>15 deterministic AI&nbsp;design patterns</strong> it trips — vibe purple, gradients, FAQ accordions, 1·2·3 steps, headline badges.
+    Background: <a href="https://www.adriankrebs.ch/blog/design-slop/" target="_blank" rel="noopener">the blog post</a>
+    and the <a href="https://news.ycombinator.com/item?id=47864393" target="_blank" rel="noopener">HN discussion</a>.
+  </p>
+
+  <form class="form" id="form">
+    <input type="text" id="url" placeholder="example.com" autocomplete="off" autocapitalize="off" spellcheck="false" autofocus>
+    <button type="submit" id="submit">Scan</button>
+  </form>
+  <div class="examples">
+    Try:
+    <button data-url="https://news.ycombinator.com/">news.ycombinator.com</button>
+    <button data-url="https://stripe.com">stripe.com</button>
+    <button data-url="https://vercel.com">vercel.com</button>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <div class="layout">
+    <div class="shot empty" id="shot"><span>No scan yet</span></div>
+    <div class="panel" id="panel">
+      <div class="placeholder">Paste a URL and hit Scan.<br>Each scan launches a real browser and runs ~15 checks — takes 5–15s.</div>
+    </div>
+  </div>
+
+  <footer>
+    Deterministic DOM heuristics, not a judgment of quality. ~5–10% false positives on a labeled set of ~150 sites — take it with a grain of salt.
+    Source: <a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank" rel="noopener">github.com/AdrianKrebs/ai-design-checker</a>.
+  </footer>
+</div>
+
+<div class="zoom" id="zoom"><img id="zoomImg" alt=""></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const form = $('#form'), urlInput = $('#url'), submit = $('#submit');
+const statusEl = $('#status'), shot = $('#shot'), panel = $('#panel');
+const zoom = $('#zoom'), zoomImg = $('#zoomImg');
+
+document.querySelectorAll('.examples button').forEach(b =>
+  b.addEventListener('click', () => { urlInput.value = b.dataset.url; form.requestSubmit(); }));
+
+shot.addEventListener('click', () => {
+  const img = shot.querySelector('img');
+  if (!img) return;
+  zoomImg.src = img.src; zoom.classList.add('open');
+});
+zoom.addEventListener('click', () => zoom.classList.remove('open'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') zoom.classList.remove('open'); });
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const url = urlInput.value.trim();
+  if (!url) return;
+  submit.disabled = true;
+  statusEl.className = 'status';
+  statusEl.innerHTML = '<span class="spinner"></span>Scanning ' + esc(url) + '…';
+  shot.className = 'shot empty'; shot.innerHTML = '<span>Loading…</span>';
+  panel.innerHTML = '<div class="placeholder">Running detector…<br>Launching browser, waiting for fonts, scrolling for lazy content.</div>';
+  try {
+    const res = await fetch('/api/scan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url }) });
+    const data = await res.json();
+    if (!res.ok) {
+      statusEl.className = 'status error';
+      statusEl.textContent = 'Error: ' + (data.error || res.statusText);
+      shot.className = 'shot empty'; shot.innerHTML = '<span>Scan failed</span>';
+      panel.innerHTML = '<div class="placeholder">—</div>';
+      return;
+    }
+    render(data);
+    statusEl.textContent = (data.cached ? 'Cached result. ' : 'Scanned in ' + (data.elapsedMs / 1000).toFixed(1) + 's. ');
+  } catch (err) {
+    statusEl.className = 'status error';
+    statusEl.textContent = 'Network error: ' + err.message;
+  } finally {
+    submit.disabled = false;
+  }
+});
+
+function render(data) {
+  shot.className = 'shot';
+  shot.innerHTML = '';
+  if (data.screenshot) {
+    const img = document.createElement('img');
+    img.src = data.screenshot; img.alt = 'screenshot of ' + data.url;
+    shot.appendChild(img);
+  } else {
+    shot.className = 'shot empty'; shot.innerHTML = '<span>No screenshot</span>';
+  }
+
+  const tierClass = (data.tierLabel || data.tier || '').toLowerCase();
+  const flagged = data.patterns.filter(p => p.triggered);
+  const clean = data.patterns.filter(p => !p.triggered);
+
+  let h = '<div class="verdict">';
+  h += '<div class="tier ' + tierClass + '">' + esc(data.tierLabel || data.tier) + '</div>';
+  h += '<div class="score"><span class="num">' + data.score + '</span><span class="denom">/100</span></div>';
+  h += '<div class="meta">' + data.patternsFlagged + ' / ' + data.patternsTotal + ' patterns<br><a href="' + esc(data.url) + '" target="_blank" rel="noopener">visit&nbsp;site&nbsp;↗</a></div>';
+  h += '</div>';
+
+  h += '<h2>Flagged (' + flagged.length + ')</h2>';
+  h += flagged.length ? flagged.map(p => row(p, true)).join('') : '<div class="placeholder" style="padding:14px">No patterns triggered — clean.</div>';
+  h += '<h2>Not flagged (' + clean.length + ')</h2>';
+  h += clean.map(p => row(p, false)).join('');
+  panel.innerHTML = h;
+}
+
+function row(p, on) {
+  let s = '<div class="pattern ' + (on ? 'on' : 'off') + '"><div class="head">';
+  s += '<strong>' + esc(p.label || p.id) + '</strong>';
+  s += '<span class="badge ' + (on ? 'on' : 'off') + '">' + (on ? 'FLAGGED' : 'clean') + '</span></div>';
+  if (p.description) s += '<div class="ev">' + esc(p.description) + '</div>';
+  return s + '</div>';
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+</script>
+</body>
+</html>

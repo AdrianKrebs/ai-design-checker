@@ -86,12 +86,19 @@ export async function analyzePage(browser, url, detectorSource, opts = {}) {
     return { url, error: 'detector failed: ' + e.message, elapsedMs: Date.now() - started };
   }
   const slug = slugFromUrl(url);
-  const shotPath = join(screenshotDir, slug + '.png');
-  try {
-    await mkdir(screenshotDir, { recursive: true });
-    // Full-page screenshot so labelers can scroll the whole site, not just the hero.
-    await page.screenshot({ path: shotPath, fullPage: true });
-  } catch {}
+  // Web deploy path: capture the screenshot into memory instead of writing it
+  // to disk, so the server stays stateless across machines (no shared volume).
+  let screenshotBuffer = null;
+  if (opts.screenshotBuffer) {
+    try { screenshotBuffer = await page.screenshot({ fullPage: opts.fullPage !== false }); } catch {}
+  } else {
+    const shotPath = join(screenshotDir, slug + '.png');
+    try {
+      await mkdir(screenshotDir, { recursive: true });
+      // Full-page screenshot so labelers can scroll the whole site, not just the hero.
+      await page.screenshot({ path: shotPath, fullPage: true });
+    } catch {}
+  }
   await context.close();
 
   const scored = scoreReport(raw);
@@ -100,6 +107,7 @@ export async function analyzePage(browser, url, detectorSource, opts = {}) {
     slug,
     elapsedMs: Date.now() - started,
     screenshot: 'screenshots/' + slug + '.png',
+    screenshotBuffer,
     raw,
     ...scored
   };

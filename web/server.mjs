@@ -32,6 +32,9 @@ import { analyzePage } from '../src/run.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PUBLIC = join(__dirname, 'public');
 const INDEX_HTML = join(PUBLIC, 'index.html');
+// Pre-built, self-contained gallery of classified Show HN sites (screenshots
+// served from the CDN). Rebuild with `node src/build-report.js --cdn-base=… --out=web/report.html`.
+const REPORT_HTML = join(__dirname, 'report.html');
 
 const PORT = Number(process.env.PORT) || 8080;
 // How many scans may run concurrently *per machine*. Each headless Chromium
@@ -178,6 +181,12 @@ const server = createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/') {
       const html = await readFile(INDEX_HTML).catch(() => null);
       if (!html) return send(res, 500, 'text/plain', 'missing index.html');
+      return send(res, 200, 'text/html; charset=utf-8', html);
+    }
+
+    if (req.method === 'GET' && (url.pathname === '/show' || url.pathname === '/show/')) {
+      const html = await readFile(REPORT_HTML).catch(() => null);
+      if (!html) return send(res, 404, 'text/plain', 'report not built — run build-report.js');
       return send(res, 200, 'text/html; charset=utf-8', html);
     }
 

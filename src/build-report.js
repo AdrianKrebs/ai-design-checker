@@ -70,156 +70,200 @@ const html = `<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AI Design Checker · Show HN submissions scored for AI design patterns</title>
 <style>
+  /* GOV.UK Design System styling — Arial, black masthead, blue underlined
+     links, flat square panels, #b1b4b6 hairlines, yellow focus, tier colours. */
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
-    font: 11pt Verdana, Geneva, sans-serif;
+    font: 14px/1.5 arial, "Helvetica Neue", Helvetica, sans-serif;
     background: #ffffff;
-    color: #828282;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    color: #0b0c0c;
   }
-  a { color: #000; text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .wrap { max-width: 1100px; margin: 0 auto; background: #f6f6ef; }
+  a { color: #1d70b8; text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1px; }
+  a:visited { color: #4c2c92; }
+  a:hover { color: #003078; text-decoration-thickness: 3px; }
+  a:focus { outline: 3px solid transparent; color: #0b0c0c; background: #fd0; box-shadow: 0 -2px #fd0, 0 4px #0b0c0c; text-decoration: none; }
+  .wrap { max-width: 1100px; margin: 0 auto; background: #fff; }
 
-  /* Topbar — HN orange */
-  .topbar { background: #ff6600; padding: 2px 8px; }
-  .topbar-inner { display: flex; align-items: baseline; gap: 0; flex-wrap: wrap; line-height: 1.4; }
-  .topbar a { color: #000; font-weight: 400; font-size: 10.5pt; padding: 0 5px; }
-  .topbar a:visited { color: #000; }
-  .topbar .sep { color: #000; padding: 0; }
-  .topbar .brand a { font-weight: 700; padding-right: 8px; padding-left: 0; }
+  /* Topbar — HN orange masthead (Show HN identity); the rest stays GOV.UK */
+  .topbar { background: #ff6600; padding: 10px 16px; }
+  .topbar-inner { display: flex; align-items: baseline; gap: 0; flex-wrap: wrap; line-height: 1.5; }
+  .topbar a { color: #0b0c0c; font-weight: 400; font-size: 15px; padding: 0 7px; text-decoration: none; }
+  .topbar a:visited { color: #0b0c0c; }
+  .topbar a:hover { color: #0b0c0c; text-decoration: underline; text-decoration-thickness: 3px; }
+  .topbar a:focus { color: #0b0c0c; background: #fd0; box-shadow: 0 -2px #fd0, 0 4px #0b0c0c; text-decoration: none; }
+  .topbar .sep { color: rgba(0,0,0,.4); padding: 0; }
+  .topbar .brand a { font-weight: 700; padding-right: 10px; padding-left: 0; }
   .topbar .right { margin-left: auto; }
-  .topbar a.topsel { color: #ffffff; }
+  .topbar a.topsel { color: #fff; font-weight: 700; text-decoration: underline; text-decoration-thickness: 3px; }
 
   /* Subline strip */
   .subline {
-    color: #828282;
-    font-size: 9pt;
-    padding: 6px 8px 4px;
-    line-height: 1.6;
+    color: #505a5f;
+    font-size: 14px;
+    padding: 10px 16px 6px;
+    line-height: 1.55;
   }
-  .subline a { color: #000; text-decoration: underline; }
+  .subline a { color: #1d70b8; }
   .subline p { margin: 0 0 6px; }
 
   /* Inline tier breakdown — clickable filter, severity-colored */
   .subline .tier-link { text-decoration: none; }
   .subline .tier-link b { font-weight: 700; }
-  .subline .tier-link:hover { text-decoration: underline; }
-  .subline .tier-heavy { color: #c62a0a; }
-  .subline .tier-mild  { color: #a86b00; }
-  .subline .tier-clean { color: #3d8a3d; }
+  .subline .tier-link:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+  .subline .tier-heavy { color: #942514; }
+  .subline .tier-mild  { color: #594d00; }
+  .subline .tier-clean { color: #005a30; }
 
   /* Pattern frequency — also a filter UI */
   .freq {
-    padding: 4px 8px 10px;
-    font-size: 9pt;
-    color: #828282;
+    padding: 6px 16px 12px;
+    font-size: 14px;
+    color: #505a5f;
   }
   .freq[open] > .freq-title::-webkit-details-marker,
-  .freq[open] > .freq-title::marker { color: #828282; }
-  .freq-title { color: #828282; padding: 4px 0 6px; font-size: 9pt; cursor: pointer; list-style: none; user-select: none; }
-  .freq-title::before { content: '▾'; color: #000; font-size: 11pt; padding-right: 6px; display: inline-block; transform: translateY(-1px); }
+  .freq[open] > .freq-title::marker { color: #505a5f; }
+  .freq-title { color: #0b0c0c; padding: 6px 0 8px; font-size: 14px; cursor: pointer; list-style: none; user-select: none; }
+  .freq-title::before { content: '▾'; color: #0b0c0c; font-size: 14px; padding-right: 6px; display: inline-block; transform: translateY(-1px); }
   .freq:not([open]) > .freq-title::before { content: '▸'; }
-  .freq-title:hover::before { color: #ff6600; }
+  .freq-title:hover { color: #1d70b8; }
+  .freq-title:hover::before { color: #1d70b8; }
   .freq-title::-webkit-details-marker { display: none; }
-  .freq-title .clear { color: #ff6600; padding-left: 8px; cursor: pointer; }
-  .freq-title .clear:hover { text-decoration: underline; }
+  .freq-title .clear { color: #1d70b8; padding-left: 8px; cursor: pointer; text-decoration: underline; }
+  .freq-title .clear:hover { text-decoration-thickness: 3px; }
   .freq-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
     column-gap: 18px;
     row-gap: 1px;
   }
-  .freq-row { display: grid; grid-template-columns: 100px 1fr 32px; gap: 8px; align-items: center; line-height: 1.7; cursor: pointer; padding: 1px 4px; border-radius: 2px; }
-  .freq-row:hover { background: #ececdf; }
-  .freq-row.active { background: #ffe2cc; }
-  .freq-row.active .name { color: #c64a00; font-weight: 700; }
-  .freq-row .name { color: #444; }
-  .freq-row .bar { height: 7px; background: #e5e5dc; }
-  .freq-row .bar-fill { height: 100%; background: #9c9c8c; }
-  .freq-row.active .bar-fill { background: #c62a0a; }
-  .freq-row .pct { text-align: right; color: #828282; font-variant-numeric: tabular-nums; font-size: 9pt; }
+  .freq-row { display: grid; grid-template-columns: 100px 1fr 32px; gap: 8px; align-items: center; line-height: 1.7; cursor: pointer; padding: 2px 4px; }
+  .freq-row:hover { background: #f3f2f1; }
+  .freq-row.active { background: #f3f2f1; }
+  .freq-row.active .name { color: #1d70b8; font-weight: 700; }
+  .freq-row .name { color: #0b0c0c; }
+  .freq-row .bar { height: 7px; background: #e8e8e8; }
+  .freq-row .bar-fill { height: 100%; background: #505a5f; }
+  .freq-row.active .bar-fill { background: #1d70b8; }
+  .freq-row .pct { text-align: right; color: #505a5f; font-variant-numeric: tabular-nums; font-size: 13px; }
 
   /* Active-pattern banner (replaces search row when pattern is set) */
-  .active-banner { padding: 6px 8px; font-size: 9pt; color: #828282; display: flex; align-items: baseline; gap: 8px; min-height: 1.6em; }
-  .active-banner .label { color: #828282; }
-  .active-banner .pat-name { color: #c64a00; font-weight: 700; }
-  .active-banner .clear-btn { color: #828282; cursor: pointer; padding-left: 4px; }
-  .active-banner .clear-btn:hover { color: #000; text-decoration: underline; }
-  .active-banner .count { color: #828282; margin-left: auto; }
+  .active-banner { padding: 8px 16px; font-size: 14px; color: #505a5f; display: flex; align-items: baseline; gap: 8px; min-height: 1.6em; }
+  .active-banner .label { color: #505a5f; }
+  .active-banner .pat-name { color: #1d70b8; font-weight: 700; }
+  .active-banner .clear-btn { color: #1d70b8; cursor: pointer; padding-left: 4px; text-decoration: underline; }
+  .active-banner .clear-btn:hover { text-decoration-thickness: 3px; }
+  .active-banner .count { color: #505a5f; margin-left: auto; }
 
-  /* List — HN-style ranked rows */
-  .list { padding: 2px 0 22px; }
-  .item { display: grid; grid-template-columns: auto 70px 1fr; gap: 6px; padding: 6px 8px; align-items: flex-start; scroll-margin-top: 8px; }
-  .item:hover { background: #f0eee5; }
-  .item:target { background: #ffe2cc; box-shadow: inset 3px 0 0 #c62a0a; }
-  .item .rank { color: #828282; font-size: 11pt; text-align: right; padding-top: 4px; font-variant-numeric: tabular-nums; }
-  .item .rank a { color: #828282; text-decoration: none; }
-  .item .rank a:hover { color: #c62a0a; }
-  .item .shot { width: 70px; height: 46px; background: #fff; border: 1px solid #d5d5cc; overflow: hidden; display: block; flex-shrink: 0; }
+  /* List — ranked rows */
+  .list { padding: 4px 0 24px; }
+  .item { display: grid; grid-template-columns: auto 70px 1fr; gap: 8px; padding: 10px 16px; align-items: flex-start; scroll-margin-top: 8px; border-bottom: 1px solid #b1b4b6; }
+  .item:hover { background: #f3f2f1; }
+  .item:target { background: #f3f2f1; box-shadow: inset 4px 0 0 #1d70b8; }
+  .item .rank { color: #505a5f; font-size: 16px; text-align: right; padding-top: 2px; font-variant-numeric: tabular-nums; }
+  .item .rank a { color: #505a5f; text-decoration: none; }
+  .item .rank a:hover { color: #1d70b8; }
+  .item .shot { width: 70px; height: 46px; background: #fff; border: 1px solid #b1b4b6; overflow: hidden; display: block; flex-shrink: 0; }
   .item .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
   .item.no-shot .shot { visibility: hidden; }
-  .item .body { line-height: 1.55; min-width: 0; }
-  .item .title-line { font-size: 11pt; word-break: break-word; }
-  .item .title-line a.t { color: #000; font-weight: 400; }
-  .item .title-line a.t:visited { color: #828282; }
-  .item .title-line .domain { color: #828282; font-size: 9pt; padding-left: 5px; }
-  .item .domain a { color: #828282; }
-  .item .subtext { color: #828282; font-size: 9pt; padding-top: 2px; line-height: 1.7; }
-  .item .subtext a { color: #828282; }
-  .item .subtext a:hover { text-decoration: underline; }
+  .item .body { line-height: 1.5; min-width: 0; }
+  .item .title-line { font-size: 16px; word-break: break-word; }
+  .item .title-line a.t { color: #1d70b8; font-weight: 700; }
+  .item .title-line a.t:visited { color: #4c2c92; }
+  .item .title-line .domain { color: #505a5f; font-size: 13px; padding-left: 6px; }
+  .item .domain a { color: #505a5f; }
+  .item .subtext { color: #505a5f; font-size: 13px; padding-top: 3px; line-height: 1.7; }
+  .item .subtext a { color: #1d70b8; }
+  .item .subtext a:hover { text-decoration-thickness: 3px; }
   .item .tier { font-weight: 700; }
-  .item .tier-heavy { color: #c62a0a; }
-  .item .tier-mild { color: #a86b00; }
-  .item .tier-clean { color: #3d8a3d; }
-  .item .hn-link { color: #828282; text-decoration: none; }
-  .item .hn-link:hover { color: #000; text-decoration: underline; }
-  .item .flags { color: #828282; padding-top: 1px; display: block; }
-  .item .flag { color: #828282; cursor: pointer; padding: 4px 2px; margin: -4px 0; border-radius: 2px; }
-  .item .flag:hover { color: #000; text-decoration: underline; }
-  .item .flag.active { color: #828282; }
+  .item .tier-heavy { color: #942514; }
+  .item .tier-mild { color: #594d00; }
+  .item .tier-clean { color: #005a30; }
+  .item .hn-link { color: #1d70b8; text-decoration: underline; }
+  .item .hn-link:hover { text-decoration-thickness: 3px; }
+  .item .flags { color: #505a5f; padding-top: 2px; display: block; }
+  .item .flag { color: #505a5f; cursor: pointer; padding: 4px 2px; margin: -4px 0; text-decoration: underline; }
+  .item .flag:hover { color: #0b0c0c; text-decoration-thickness: 3px; }
+  .item .flag.active { color: #942514; font-weight: 700; }
 
   /* Sort + filter banner */
-  .active-banner .sort { color: #828282; }
-  .active-banner .sort .label { color: #828282; }
-  .active-banner .sort a { color: #828282; padding: 0 4px; }
-  .active-banner .sort a.active { color: #000; text-decoration: underline; }
-  .active-banner .sort a:hover { color: #000; }
+  .active-banner .sort { color: #505a5f; }
+  .active-banner .sort .label { color: #505a5f; }
+  .active-banner .sort a { color: #1d70b8; padding: 0 4px; }
+  .active-banner .sort a.active { color: #0b0c0c; font-weight: 700; text-decoration: underline; }
+  .active-banner .sort a:hover { text-decoration-thickness: 3px; }
 
-  .empty { padding: 30px 8px; text-align: center; color: #828282; font-size: 10pt; }
+  .empty { padding: 30px 16px; text-align: center; color: #505a5f; font-size: 16px; }
 
-  /* Pagination — HN-style "More" link */
-  .more { padding: 12px 8px 16px 38px; font-size: 10pt; }
-  .more a { color: #828282; }
-  .more a:hover { color: #000; text-decoration: underline; }
+  /* Pagination — "More" link */
+  .more { padding: 14px 16px 18px 46px; font-size: 16px; }
+  .more a { color: #1d70b8; }
+  .more a:hover { text-decoration-thickness: 3px; }
 
   /* Footer */
-  .footer { padding: 18px 10px 30px; font-size: 9pt; color: #828282; text-align: center; border-top: 1px solid #e5e5dc; margin-top: 10px; }
-  .footer a { color: #828282; text-decoration: underline; }
+  .footer { padding: 20px 16px 32px; font-size: 14px; color: #505a5f; text-align: center; border-top: 1px solid #b1b4b6; margin-top: 12px; }
+  .footer a { color: #1d70b8; }
 
   @media (max-width: 700px) {
-    body { font-size: 10.5pt; }
-    .item { grid-template-columns: 26px 60px 1fr; gap: 8px; padding: 6px 8px; }
+    body { font-size: 14px; }
+    .item { grid-template-columns: 26px 60px 1fr; gap: 8px; padding: 8px 12px; }
     .item .shot { width: 60px; height: 40px; }
-    .item .title-line { font-size: 10.5pt; line-height: 1.4; }
-    .item .subtext { font-size: 8.5pt; line-height: 1.7; }
-    .item .hn-link { font-size: 8pt; padding: 0 4px; }
+    .item .title-line { font-size: 15px; line-height: 1.4; }
+    .item .subtext { font-size: 12px; line-height: 1.7; }
+    .item .hn-link { font-size: 12px; padding: 0 4px; }
     .freq-row { grid-template-columns: 88px 1fr 30px; line-height: 1.6; }
     .freq-grid { grid-template-columns: 1fr; }
-    .topbar a { font-size: 9.5pt; padding: 0 3px; }
+    .topbar a { font-size: 14px; padding: 0 4px; }
     .topbar .right { width: 100%; margin-left: 0; padding-top: 2px; }
     .topbar .filter .filter-count { display: none; }
-    .subline { font-size: 8.5pt; padding: 6px 8px 4px; }
-    .active-banner { flex-wrap: wrap; row-gap: 4px; padding: 6px 8px; font-size: 8.5pt; }
+    .subline { font-size: 13px; padding: 8px 12px 4px; }
+    .active-banner { flex-wrap: wrap; row-gap: 4px; padding: 8px 12px; font-size: 13px; }
     .active-banner .sort a { padding: 0 3px; }
     .active-banner .count { margin-left: auto; }
   }
   @media (max-width: 480px) {
-    .topbar .filter { font-size: 9pt; padding: 0 2px; }
+    .topbar .filter { font-size: 13px; padding: 0 2px; }
     .freq-row { grid-template-columns: 80px 1fr 28px; gap: 4px; }
   }
+
+  /* ── GOV.UK finder layout: left facet sidebar + results column ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  .page-title { font-size: 32px; font-weight: 700; line-height: 1.09; color: #0b0c0c; margin: 28px 0 22px; }
+  .finder { display: grid; grid-template-columns: 1fr 2.3fr; gap: 40px; align-items: start; }
+  @media (max-width: 700px) { .finder { grid-template-columns: 1fr; gap: 16px; } }
+
+  .finder-side { font-size: 16px; }
+  .facet { padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid #b1b4b6; }
+  .facet-h { font-size: 16px; font-weight: 700; color: #0b0c0c; margin: 0 0 8px; }
+  .facet-list { list-style: none; margin: 0; padding: 0; }
+  .facet-list li { padding: 3px 0; line-height: 1.4; }
+  .facet-list .filter { color: #1d70b8; text-decoration: underline; text-underline-offset: 0.15em; font-size: 16px; }
+  .facet-list .filter:hover { text-decoration-thickness: 3px; }
+  .facet-list .filter.topsel { color: #0b0c0c; font-weight: 700; text-decoration: none; }
+  .facet-list .fc { color: #505a5f; }
+
+  /* pattern frequency becomes the "Pattern" facet in the sidebar */
+  .finder-side .freq { padding: 0; border-bottom: 0; }
+  .finder-side .freq-grid { grid-template-columns: 1fr; column-gap: 0; row-gap: 0; }
+  .finder-side .freq-row { grid-template-columns: minmax(0,1fr) 44px 32px; gap: 6px; padding: 3px 0; }
+
+  .finder-results { min-width: 0; }
+  .intro { color: #505a5f; font-size: 16px; line-height: 1.5; margin: 0 0 14px; }
+
+  /* results header — GOV.UK "N results" count + Sort by row */
+  .active-banner { flex-wrap: wrap; align-items: baseline; gap: 6px 10px; padding: 0 0 12px; margin-bottom: 0; border-bottom: 1px solid #b1b4b6; min-height: 0; }
+  .active-banner .count { order: -1; width: 100%; margin-left: 0; font-weight: 700; font-size: 19px; color: #0b0c0c; }
+  .active-banner .sort { font-size: 16px; }
+  .active-banner .pat-name { color: #1d70b8; }
+
+  /* document-list items */
+  .list { padding: 0 0 24px; }
+  .item { padding: 16px 0; gap: 12px; }
+  .item:hover { background: transparent; }
+  .item:target { background: #f3f2f1; box-shadow: inset 4px 0 0 #1d70b8; }
+  .item .title-line a.t { font-size: 19px; }
+  .item .subtext { font-size: 14px; }
+  .more { padding: 16px 0 8px; }
 </style>
 </head>
 <body>
@@ -228,13 +272,6 @@ const html = `<!doctype html>
 <div class="topbar">
   <div class="topbar-inner">
     <span class="brand"><a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank">AI Design Checker</a></span>
-    <a class="filter" data-tier="" href="#all">All<span class="filter-count"> (${total})</span></a>
-    <span class="sep">|</span>
-    <a class="filter" data-tier="Heavy" href="#heavy">Slop<span class="filter-count"> (${tierCount.Heavy})</span></a>
-    <span class="sep">|</span>
-    <a class="filter" data-tier="Mild" href="#mild">Medium<span class="filter-count"> (${tierCount.Mild})</span></a>
-    <span class="sep">|</span>
-    <a class="filter" data-tier="Clean" href="#clean">Clean<span class="filter-count"> (${tierCount.Clean})</span></a>
     <span class="right">
       <a href="https://www.adriankrebs.ch/blog/design-slop/" target="_blank">Methodology</a>
       <span class="sep">|</span>
@@ -243,27 +280,37 @@ const html = `<!doctype html>
   </div>
 </div>
 
-<div class="subline">
-  <p>Show HN submissions scored against deterministic AI design patterns &nbsp;·&nbsp;
-    <a class="tier-link tier-heavy" data-tier="Heavy" href="#heavy" title="Slop · 4+ patterns flagged · click to filter">Slop <b>${tierCount.Heavy}</b> (${(100 * tierCount.Heavy / total).toFixed(0)}%)</a> ·
-    <a class="tier-link tier-mild" data-tier="Mild" href="#mild" title="Medium · 2–3 patterns flagged · click to filter">Medium <b>${tierCount.Mild}</b> (${(100 * tierCount.Mild / total).toFixed(0)}%)</a> ·
-    <a class="tier-link tier-clean" data-tier="Clean" href="#clean" title="Clean · 0–1 patterns flagged · click to filter">Clean <b>${tierCount.Clean}</b> (${(100 * tierCount.Clean / total).toFixed(0)}%)</a>
-  </p>
-</div>
+<div class="container">
+  <h1 class="page-title">Show HN, scored for AI design patterns</h1>
 
-<details class="freq">
-  <summary class="freq-title">Pattern frequency · click to filter</summary>
-  <div class="freq-grid" id="freq"></div>
-</details>
+  <div class="finder">
+    <aside class="finder-side">
+      <div class="facet">
+        <h2 class="facet-h">Tier</h2>
+        <ul class="facet-list">
+          <li><a class="filter" data-tier="" href="#all">All <span class="fc">${total}</span></a></li>
+          <li><a class="filter" data-tier="Heavy" href="#heavy">Slop <span class="fc">${tierCount.Heavy}</span></a></li>
+          <li><a class="filter" data-tier="Mild" href="#mild">Medium <span class="fc">${tierCount.Mild}</span></a></li>
+          <li><a class="filter" data-tier="Clean" href="#clean">Clean <span class="fc">${tierCount.Clean}</span></a></li>
+        </ul>
+      </div>
+      <details class="freq facet">
+        <summary class="freq-title">Pattern</summary>
+        <div class="freq-grid" id="freq"></div>
+      </details>
+    </aside>
 
-<div class="active-banner" id="banner"></div>
+    <section class="finder-results">
+      <p class="intro">Show HN submissions scored against deterministic AI design patterns.</p>
+      <div class="active-banner" id="banner"></div>
+      <div class="list" id="grid"></div>
+      <div class="more" id="more"></div>
+    </section>
+  </div>
 
-<div class="list" id="grid"></div>
-<div class="more" id="more"></div>
-
-<div class="footer">
-  Generated ${new Date().toISOString().slice(0, 10)} · <a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank">github.com/AdrianKrebs/ai-design-checker</a>
-</div>
+  <div class="footer">
+    Generated ${new Date().toISOString().slice(0, 10)} · <a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank">github.com/AdrianKrebs/ai-design-checker</a>
+  </div>
 </div>
 
 <script>

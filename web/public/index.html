@@ -8,90 +8,123 @@
 <meta property="og:title" content="AI Design Checker">
 <meta property="og:description" content="Score any website for common AI design patterns.">
 <style>
+  /* GOV.UK Design System conventions on a Linear-style layout: Arial, bold
+     black headings, blue underlined links, green square button with a hard
+     bottom edge, yellow focus states, flat #b1b4b6-bordered panels, no radius. */
   :root {
-    --bg: #f6f6ef;        /* HN beige */
-    --ink: #1a1a1a;
-    --muted: #666;
-    --line: #e0e0d8;
-    --accent: #ff6600;    /* HN orange */
-    --card: #ffffff;
+    --font: arial, "Helvetica Neue", Helvetica, sans-serif;
+    --text: #0b0c0c;
+    --muted: #505a5f;
+    --bg: #ffffff;
+    --panel: #f3f2f1;
+    --border: #b1b4b6;
+    --link: #1d70b8;
+    --link-hover: #003078;
+    --green: #00703c;
+    --green-hover: #005a30;
+    --green-shadow: #002d18;
+    --focus: #fd0;
+    --heavy: #942514;  --heavy-bg: #f6d7d2;
+    --mild: #594d00;   --mild-bg: #fff7bf;
+    --clean: #005a30;  --clean-bg: #cce2d8;
   }
   * { box-sizing: border-box; }
-  body { font: 15px/1.5 Verdana, Geneva, -apple-system, sans-serif; margin: 0; color: var(--ink); background: var(--bg); }
-  a { color: #1a4dba; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 0 16px 64px; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 18px/1.5 var(--font); }
 
-  header { background: var(--accent); padding: 10px 16px; }
-  header .inner { max-width: 920px; margin: 0 auto; display: flex; align-items: baseline; gap: 10px; }
-  header b { color: #000; font-size: 15px; }
-  header span { color: #1d1d1d; font-size: 12px; }
+  a { color: var(--link); text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1px; }
+  a:hover { color: var(--link-hover); text-decoration-thickness: 3px; }
+  a:focus { outline: 3px solid transparent; color: #0b0c0c; background: var(--focus); box-shadow: 0 -2px var(--focus), 0 4px #0b0c0c; text-decoration: none; }
 
-  h1 { font-size: 24px; margin: 28px 0 6px; }
-  .lede { color: var(--muted); font-size: 14px; margin: 0 0 20px; max-width: 620px; }
-  .lede a { color: #1a4dba; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px 80px; }
 
-  .form { display: flex; gap: 8px; }
-  .form input { flex: 1; font: 15px ui-monospace, SFMono-Regular, Menlo, monospace; padding: 11px 12px; border: 1px solid #bbb; border-radius: 5px; background: #fff; }
-  .form input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: var(--accent); }
-  .form button { font: 600 15px Verdana, sans-serif; padding: 0 22px; background: #000; color: #fff; border: 0; border-radius: 5px; cursor: pointer; }
-  .form button:hover:not(:disabled) { background: #333; }
-  .form button:disabled { background: #999; cursor: not-allowed; }
+  /* GOV.UK-style black masthead: black bar, white wordmark, nav link right. */
+  .topbar { background: var(--text); }
+  .topbar .inner { max-width: 760px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: baseline; gap: 16px; }
+  .topbar b { color: #fff; font-weight: 700; font-size: 17px; }
+  .topbar nav { margin-left: auto; }
+  .topbar nav a { color: #fff; font-size: 16px; text-decoration: underline; text-underline-offset: 0.15em; text-decoration-thickness: 1px; }
+  .topbar nav a:hover { text-decoration-thickness: 3px; }
+  .topbar nav a:focus { color: var(--text); background: var(--focus); box-shadow: 0 -2px var(--focus), 0 4px var(--text); text-decoration: none; outline: 3px solid transparent; }
 
-  .examples { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
-  .examples button { font: 12px ui-monospace, monospace; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; margin: 0 4px 4px 0; cursor: pointer; color: #333; }
-  .examples button:hover { border-color: #999; }
+  h1 { font-size: clamp(32px, 5vw, 48px); font-weight: 700; line-height: 1.09; margin: 48px 0 16px; }
+  .lede { font-size: 19px; line-height: 1.47; margin: 0 0 32px; max-width: 580px; }
 
-  .status { min-height: 22px; margin: 16px 0 0; color: var(--muted); font-size: 13px; }
-  .status.error { color: #b03a2e; }
-  .spinner { display: inline-block; width: 13px; height: 13px; border: 2px solid #ccc; border-top-color: #000; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+  .form { display: flex; gap: 10px; align-items: flex-start; }
+  .form input {
+    flex: 1; font: 400 19px/1.3 var(--font); color: var(--text);
+    padding: 9px 11px; border: 2px solid var(--text); background: #fff;
+  }
+  .form input:focus { outline: 3px solid var(--focus); outline-offset: 0; box-shadow: inset 0 0 0 2px var(--text); }
+  .form input::placeholder { color: #6f777b; }
+  .form button {
+    font: 400 19px var(--font); color: #fff; background: var(--green);
+    border: 2px solid transparent; box-shadow: 0 2px 0 var(--green-shadow);
+    padding: 9px 16px; cursor: pointer;
+  }
+  .form button:hover:not(:disabled) { background: var(--green-hover); }
+  .form button:focus { outline: 3px solid transparent; background: var(--focus); color: var(--text); box-shadow: 0 4px 0 var(--text); }
+  .form button:disabled { opacity: .6; cursor: not-allowed; }
+
+  .examples { margin-top: 14px; font-size: 16px; color: var(--muted); }
+  .examples button {
+    font: 400 16px var(--font); background: none; border: 0; padding: 0; margin-left: 12px; cursor: pointer;
+    color: var(--link); text-decoration: underline; text-underline-offset: 0.15em;
+  }
+  .examples button:hover { color: var(--link-hover); text-decoration-thickness: 3px; }
+  .examples button:focus { outline: 3px solid transparent; color: var(--text); background: var(--focus); box-shadow: 0 -2px var(--focus), 0 4px var(--text); text-decoration: none; }
+
+  /* GOV.UK finder document-list: one row per scan, newest prepended,
+     hairline-separated. Nothing shows until the first scan. */
+  .results { margin-top: 28px; }
+  .results:not(:empty) { border-top: 1px solid var(--border); }
+  .loading, .error-row { padding: 16px 0; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 16px; display: flex; align-items: center; }
+  .error-row { color: var(--heavy); font-weight: 700; }
+
+  .item { display: grid; grid-template-columns: 120px 1fr; gap: 18px; padding: 18px 0; border-bottom: 1px solid var(--border); align-items: start; }
+  @media (max-width: 600px) { .item { grid-template-columns: 88px 1fr; gap: 12px; } }
+  .shot { border: 1px solid var(--border); overflow-y: auto; max-height: 220px; cursor: zoom-in; align-self: start; }
+  .shot img { width: 100%; display: block; }
+  .shot.empty { display: flex; align-items: center; justify-content: center; min-height: 78px; color: var(--muted); font-size: 13px; cursor: default; }
+
+  .item .body { min-width: 0; }
+  .item .title-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; font-size: 19px; line-height: 1.3; }
+  .item .title-line a.t { color: var(--link); font-weight: 700; text-decoration: underline; text-underline-offset: 0.15em; }
+  .item .title-line a.t:hover { color: var(--link-hover); text-decoration-thickness: 3px; }
+  .tier { font-weight: 700; font-size: 12px; letter-spacing: .02em; text-transform: uppercase; padding: 2px 8px 1px; white-space: nowrap; }
+  .tier.heavy { color: var(--heavy); background: var(--heavy-bg); }
+  .tier.mild  { color: var(--mild);  background: var(--mild-bg); }
+  .tier.clean { color: var(--clean); background: var(--clean-bg); }
+  .item .meta { color: var(--muted); font-size: 15px; margin-top: 4px; }
+
+  .flagged { margin-top: 12px; }
+  .pattern { padding: 8px 0; border-top: 1px solid var(--border); font-size: 16px; }
+  .pattern .head { display: flex; align-items: baseline; gap: 11px; }
+  .pattern .head strong { font-weight: 700; }
+  .dotmark { width: 8px; height: 8px; background: var(--heavy); flex-shrink: 0; position: relative; top: 1px; }
+  .ev { color: var(--muted); font-size: 15px; line-height: 1.45; margin: 3px 0 0 19px; }
+  .none { color: var(--clean); font-size: 16px; font-weight: 700; margin-top: 10px; }
+  .clean-line { color: var(--muted); font-size: 15px; line-height: 1.55; margin-top: 12px; }
+  .clean-line .lbl { color: var(--text); font-weight: 700; }
+
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--muted); font-size: 15px; line-height: 1.55; }
+
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 9px; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; margin-top: 16px; }
-  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
-
-  .shot { background: #fff; border: 1px solid var(--line); border-radius: 6px; overflow: auto; max-height: 560px; cursor: zoom-in; }
-  .shot img { width: 100%; display: block; }
-  .shot.empty { display: flex; align-items: center; justify-content: center; min-height: 240px; color: #aaa; font-style: italic; cursor: default; }
-
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 6px; padding: 16px; }
-  .verdict { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
-  .tier { font: 700 16px Verdana, sans-serif; padding: 6px 12px; border-radius: 6px; text-transform: uppercase; letter-spacing: .04em; }
-  .tier.heavy { background: #fdecec; color: #8b1a1a; }
-  .tier.mild  { background: #fff3c4; color: #8a6500; }
-  .tier.clean { background: #e6f3e1; color: #2c7a3a; }
-  .score .num { font: 700 28px ui-monospace, monospace; }
-  .score .denom { color: var(--muted); font-size: 13px; }
-  .meta { color: var(--muted); font-size: 12px; margin-left: auto; text-align: right; }
-
-  h2 { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .06em; margin: 16px 0 8px; }
-  .pattern { padding: 8px 10px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--line); font-size: 13px; }
-  .pattern.on { background: #fdecec; border-color: #f3c8c4; }
-  .pattern.off { color: #999; }
-  .pattern .head { display: flex; align-items: center; gap: 8px; }
-  .pattern .head strong { font-weight: 600; flex: 1; }
-  .pattern.off .head strong { font-weight: 400; }
-  .badge { font: 700 10px Verdana, sans-serif; padding: 2px 7px; border-radius: 3px; }
-  .badge.on { background: #c6310f; color: #fff; }
-  .badge.off { background: #eee; color: #999; }
-  .ev { color: #555; font-size: 12px; margin-top: 4px; }
-
-  .placeholder { color: #aaa; text-align: center; padding: 36px 16px; }
-  footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
-
-  .zoom { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: none; align-items: flex-start; justify-content: center; z-index: 99; cursor: zoom-out; padding: 24px; overflow: auto; }
+  .zoom { position: fixed; inset: 0; background: rgba(0,0,0,.8); display: none; align-items: flex-start; justify-content: center; z-index: 99; cursor: zoom-out; padding: 28px; overflow: auto; }
   .zoom.open { display: flex; }
-  .zoom img { max-width: 100%; }
+  .zoom img { max-width: 100%; border: 2px solid #fff; }
 </style>
 </head>
 <body>
 
-<header><div class="inner"><b>AI Design Checker</b><span>scores any site for common AI design patterns</span></div></header>
+<div class="topbar"><div class="inner"><b>AI Design Checker</b><nav><a href="/show">Latest Show HN, scored</a></nav></div></div>
 
 <div class="wrap">
   <h1>Is this site AI design slop?</h1>
   <p class="lede">
     Paste a URL. We load it in a real headless browser, analyze the DOM, and report which of
-    <strong>15 deterministic AI&nbsp;design patterns</strong> it trips — vibe purple, gradients, FAQ accordions, 1·2·3 steps, headline badges.
+    15 deterministic AI design patterns it trips — vibe purple, gradients, FAQ accordions, 1·2·3 steps, headline badges.
     Background: <a href="https://www.adriankrebs.ch/blog/design-slop/" target="_blank" rel="noopener">the blog post</a>
     and the <a href="https://news.ycombinator.com/item?id=47864393" target="_blank" rel="noopener">HN discussion</a>.
   </p>
@@ -101,23 +134,15 @@
     <button type="submit" id="submit">Scan</button>
   </form>
   <div class="examples">
-    Try:
+    Try
     <button data-url="https://news.ycombinator.com/">news.ycombinator.com</button>
     <button data-url="https://stripe.com">stripe.com</button>
     <button data-url="https://vercel.com">vercel.com</button>
   </div>
 
-  <div class="status" id="status"></div>
-
-  <div class="layout">
-    <div class="shot empty" id="shot"><span>No scan yet</span></div>
-    <div class="panel" id="panel">
-      <div class="placeholder">Paste a URL and hit Scan.<br>Each scan launches a real browser and runs ~15 checks — takes 5–15s.</div>
-    </div>
-  </div>
+  <div class="results" id="results"></div>
 
   <footer>
-    Deterministic DOM heuristics, not a judgment of quality. ~5–10% false positives on a labeled set of ~150 sites — take it with a grain of salt.
     Source: <a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank" rel="noopener">github.com/AdrianKrebs/ai-design-checker</a>.
   </footer>
 </div>
@@ -127,14 +152,15 @@
 <script>
 const $ = s => document.querySelector(s);
 const form = $('#form'), urlInput = $('#url'), submit = $('#submit');
-const statusEl = $('#status'), shot = $('#shot'), panel = $('#panel');
+const results = $('#results');
 const zoom = $('#zoom'), zoomImg = $('#zoomImg');
 
 document.querySelectorAll('.examples button').forEach(b =>
   b.addEventListener('click', () => { urlInput.value = b.dataset.url; form.requestSubmit(); }));
 
-shot.addEventListener('click', () => {
-  const img = shot.querySelector('img');
+// screenshots are added dynamically — delegate the zoom click
+results.addEventListener('click', e => {
+  const img = e.target.closest('.shot img');
   if (!img) return;
   zoomImg.src = img.src; zoom.classList.add('open');
 });
@@ -146,66 +172,64 @@ form.addEventListener('submit', async e => {
   const url = urlInput.value.trim();
   if (!url) return;
   submit.disabled = true;
-  statusEl.className = 'status';
-  statusEl.innerHTML = '<span class="spinner"></span>Scanning ' + esc(url) + '…';
-  shot.className = 'shot empty'; shot.innerHTML = '<span>Loading…</span>';
-  panel.innerHTML = '<div class="placeholder">Running detector…<br>Launching browser, waiting for fonts, scrolling for lazy content.</div>';
+
+  // prepend a loading row so the newest scan sits on top of the list
+  const card = document.createElement('div');
+  card.className = 'loading';
+  card.innerHTML = '<span class="spinner"></span>Scanning ' + esc(url) + '…';
+  results.prepend(card);
+
   try {
     const res = await fetch('/api/scan', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url }) });
     const data = await res.json();
     if (!res.ok) {
-      statusEl.className = 'status error';
-      statusEl.textContent = 'Error: ' + (data.error || res.statusText);
-      shot.className = 'shot empty'; shot.innerHTML = '<span>Scan failed</span>';
-      panel.innerHTML = '<div class="placeholder">—</div>';
+      card.className = 'error-row';
+      card.textContent = 'Couldn’t scan ' + url + ' — ' + (data.error || res.statusText);
       return;
     }
-    render(data);
-    statusEl.textContent = (data.cached ? 'Cached result. ' : 'Scanned in ' + (data.elapsedMs / 1000).toFixed(1) + 's. ');
+    card.className = 'item';
+    card.innerHTML = renderCard(data);
   } catch (err) {
-    statusEl.className = 'status error';
-    statusEl.textContent = 'Network error: ' + err.message;
+    card.className = 'error-row';
+    card.textContent = 'Network error — ' + err.message;
   } finally {
     submit.disabled = false;
   }
 });
 
-function render(data) {
-  shot.className = 'shot';
-  shot.innerHTML = '';
-  if (data.screenshot) {
-    const img = document.createElement('img');
-    img.src = data.screenshot; img.alt = 'screenshot of ' + data.url;
-    shot.appendChild(img);
-  } else {
-    shot.className = 'shot empty'; shot.innerHTML = '<span>No screenshot</span>';
-  }
-
+function renderCard(data) {
   const tierClass = (data.tierLabel || data.tier || '').toLowerCase();
   const flagged = data.patterns.filter(p => p.triggered);
   const clean = data.patterns.filter(p => !p.triggered);
+  const timing = data.cached ? 'cached' : (data.elapsedMs / 1000).toFixed(1) + 's';
 
-  let h = '<div class="verdict">';
-  h += '<div class="tier ' + tierClass + '">' + esc(data.tierLabel || data.tier) + '</div>';
-  h += '<div class="score"><span class="num">' + data.score + '</span><span class="denom">/100</span></div>';
-  h += '<div class="meta">' + data.patternsFlagged + ' / ' + data.patternsTotal + ' patterns<br><a href="' + esc(data.url) + '" target="_blank" rel="noopener">visit&nbsp;site&nbsp;↗</a></div>';
+  let h = data.screenshot
+    ? '<div class="shot"><img src="' + data.screenshot + '" alt="screenshot of ' + esc(data.url) + '"></div>'
+    : '<div class="shot empty">no screenshot</div>';
+
+  h += '<div class="body">';
+  h += '<div class="title-line"><a class="t" href="' + esc(data.url) + '" target="_blank" rel="noopener">' + esc(hostOf(data.url)) + '</a>';
+  h += '<span class="tier ' + tierClass + '">' + esc(data.tierLabel || data.tier) + '</span></div>';
+  h += '<div class="meta">' + data.score + '/100 · ' + data.patternsFlagged + ' of ' + data.patternsTotal + ' patterns · ' + timing + '</div>';
+
+  if (flagged.length) {
+    h += '<div class="flagged">';
+    h += flagged.map(p =>
+      '<div class="pattern"><div class="head"><span class="dotmark"></span><strong>' + esc(p.label || p.id) + '</strong></div>' +
+      (p.description ? '<div class="ev">' + esc(p.description) + '</div>' : '') + '</div>'
+    ).join('');
+    h += '</div>';
+  } else {
+    h += '<div class="none">No patterns triggered — clean.</div>';
+  }
+  if (clean.length) {
+    h += '<div class="clean-line"><span class="lbl">Clean:</span> ' + clean.map(p => esc(p.label || p.id)).join(', ') + '</div>';
+  }
   h += '</div>';
-
-  h += '<h2>Flagged (' + flagged.length + ')</h2>';
-  h += flagged.length ? flagged.map(p => row(p, true)).join('') : '<div class="placeholder" style="padding:14px">No patterns triggered — clean.</div>';
-  h += '<h2>Not flagged (' + clean.length + ')</h2>';
-  h += clean.map(p => row(p, false)).join('');
-  panel.innerHTML = h;
+  return h;
 }
 
-function row(p, on) {
-  let s = '<div class="pattern ' + (on ? 'on' : 'off') + '"><div class="head">';
-  s += '<strong>' + esc(p.label || p.id) + '</strong>';
-  s += '<span class="badge ' + (on ? 'on' : 'off') + '">' + (on ? 'FLAGGED' : 'clean') + '</span></div>';
-  if (p.description) s += '<div class="ev">' + esc(p.description) + '</div>';
-  return s + '</div>';
-}
-
+function hostOf(u) { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 </script>
 </body>

@@ -2,6 +2,7 @@
 // Add a new pattern: drop a file in this folder, import it, append to PATTERNS.
 
 import slopFonts from './slop-fonts.js';
+import heroFontMix from './hero-font-mix.js';
 import purpleAccent from './purple-accent.js';
 import gradients from './gradients.js';
 import accentStripe from './accent-stripe.js';
@@ -19,6 +20,7 @@ import faqAccordion from './faq-accordion.js';
 
 export const PATTERNS = [
   slopFonts,
+  heroFontMix,
   purpleAccent,
   gradients,
   accentStripe,

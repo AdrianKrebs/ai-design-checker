@@ -20,7 +20,10 @@ import { dirname, join, resolve, extname } from 'node:path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, '..');
-const SHOTS_DIR = join(ROOT, 'results', 'screenshots');
+// --dir=<path> uploads from a custom folder (e.g. only the freshly-scanned
+// shots) instead of the full results/screenshots corpus.
+const dirArg = process.argv.find(a => a.startsWith('--dir='));
+const SHOTS_DIR = dirArg ? resolve(dirArg.slice('--dir='.length)) : join(ROOT, 'results', 'screenshots');
 
 const STORAGE_KEY = process.env.BUNNY_STORAGE_KEY || process.env.BUNNY_API_KEY;
 const STORAGE_HOST = process.env.BUNNY_STORAGE_HOST || 'ny.storage.bunnycdn.com';

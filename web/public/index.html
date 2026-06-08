@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Design Checker — score any site for AI design patterns</title>
-<meta name="description" content="Paste a URL. We load it in a real browser and score it against 15 deterministic AI design patterns — vibe purple, gradients, FAQ accordions, 1·2·3 steps, and more.">
+<title>AI Design Checker: how AI-generated does a site look?</title>
+<meta name="description" content="Paste a URL. We load it in a real browser and score it against 16 deterministic AI design patterns like vibe purple, gradients, FAQ accordions, and 1·2·3 steps.">
 <meta property="og:title" content="AI Design Checker">
 <meta property="og:description" content="Score any website for common AI design patterns.">
 <style>
@@ -121,10 +121,10 @@
 <div class="topbar"><div class="inner"><b>AI Design Checker</b><nav><a href="/show">Latest Show HN, scored</a></nav></div></div>
 
 <div class="wrap">
-  <h1>Is this site AI design slop?</h1>
+  <h1>How AI-generated does this site look?</h1>
   <p class="lede">
-    Paste a URL. We load it in a real headless browser, analyze the DOM, and report which of
-    15 deterministic AI design patterns it trips — vibe purple, gradients, FAQ accordions, 1·2·3 steps, headline badges.
+    Paste a URL. We load it in a real headless browser, analyze the DOM, and score it against
+    16 deterministic AI design patterns like vibe purple, gradients, FAQ accordions, 1·2·3 steps, and headline badges.
     Background: <a href="https://www.adriankrebs.ch/blog/design-slop/" target="_blank" rel="noopener">the blog post</a>
     and the <a href="https://news.ycombinator.com/item?id=47864393" target="_blank" rel="noopener">HN discussion</a>.
   </p>
@@ -158,7 +158,7 @@ const zoom = $('#zoom'), zoomImg = $('#zoomImg');
 document.querySelectorAll('.examples button').forEach(b =>
   b.addEventListener('click', () => { urlInput.value = b.dataset.url; form.requestSubmit(); }));
 
-// screenshots are added dynamically — delegate the zoom click
+// screenshots are added dynamically, so delegate the zoom click
 results.addEventListener('click', e => {
   const img = e.target.closest('.shot img');
   if (!img) return;
@@ -184,14 +184,14 @@ form.addEventListener('submit', async e => {
     const data = await res.json();
     if (!res.ok) {
       card.className = 'error-row';
-      card.textContent = 'Couldn’t scan ' + url + ' — ' + (data.error || res.statusText);
+      card.textContent = 'Couldn’t scan ' + url + ': ' + (data.error || res.statusText);
       return;
     }
     card.className = 'item';
     card.innerHTML = renderCard(data);
   } catch (err) {
     card.className = 'error-row';
-    card.textContent = 'Network error — ' + err.message;
+    card.textContent = 'Network error: ' + err.message;
   } finally {
     submit.disabled = false;
   }
@@ -221,7 +221,7 @@ function renderCard(data) {
     ).join('');
     h += '</div>';
   } else {
-    h += '<div class="none">No patterns triggered — clean.</div>';
+    h += '<div class="none">No patterns triggered. Clean.</div>';
   }
   if (clean.length) {
     h += '<div class="clean-line"><span class="lbl">Clean:</span> ' + clean.map(p => esc(p.label || p.id)).join(', ') + '</div>';

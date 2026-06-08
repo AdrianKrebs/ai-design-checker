@@ -19,7 +19,7 @@ export default {
   id: 'slop_fonts',
   label: 'Templated display fonts',
   shortLabel: 'Templated font',
-  description: 'Default-stack display fonts (Space Grotesk, Instrument Serif, Geist, Syne, Fraunces). Fine in isolation — a tell when used as the page default without intentional pairing.',
+  description: 'Default-stack display fonts (Space Grotesk, Instrument Serif, Geist, Syne, Fraunces). Fine in isolation, a tell only when used as the page default without intentional pairing.',
   category: 'fonts',
   thresholds: {
     minTotalPct: 3 // require ≥3% coverage if not used as heading

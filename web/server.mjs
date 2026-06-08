@@ -21,6 +21,7 @@
 
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 import { dirname, resolve, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookup } from 'node:dns/promises';
@@ -35,6 +36,10 @@ const INDEX_HTML = join(PUBLIC, 'index.html');
 // Pre-built, self-contained gallery of classified Show HN sites (screenshots
 // served from the CDN). Rebuild with `node src/build-report.js --cdn-base=… --out=web/report.html`.
 const REPORT_HTML = join(__dirname, 'report.html');
+
+// Bundled list of classified Show HN URLs, for the "try a random site" button.
+let SHOWHN_URLS = [];
+try { SHOWHN_URLS = JSON.parse(readFileSync(join(__dirname, 'showhn-urls.json'), 'utf8')); } catch {}
 
 const PORT = Number(process.env.PORT) || 8080;
 // How many scans may run concurrently *per machine*. Each headless Chromium
@@ -177,6 +182,12 @@ const server = createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (req.method === 'GET' && url.pathname === '/healthz') return send(res, 200, 'text/plain', 'ok');
+
+    if (req.method === 'GET' && url.pathname === '/api/random') {
+      if (!SHOWHN_URLS.length) return send(res, 503, JSON_MIME, JSON.stringify({ error: 'no sample available' }));
+      const pick = SHOWHN_URLS[Math.floor(Math.random() * SHOWHN_URLS.length)];
+      return send(res, 200, JSON_MIME, JSON.stringify({ url: pick }));
+    }
 
     if (req.method === 'GET' && url.pathname === '/') {
       const html = await readFile(INDEX_HTML).catch(() => null);

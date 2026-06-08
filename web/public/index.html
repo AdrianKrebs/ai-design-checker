@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AI Design Checker: how AI-generated does a site look?</title>
+<title>AI Design Checker: how AI-generated is this website?</title>
 <meta name="description" content="Paste a URL. We load it in a real browser and score it against 16 deterministic AI design patterns like vibe purple, gradients, FAQ accordions, and 1·2·3 steps.">
 <meta property="og:title" content="AI Design Checker">
 <meta property="og:description" content="Score any website for common AI design patterns.">
@@ -121,7 +121,7 @@
 <div class="topbar"><div class="inner"><b>AI Design Checker</b><nav><a href="/show">Latest Show HN, scored</a></nav></div></div>
 
 <div class="wrap">
-  <h1>How AI-generated does this site look?</h1>
+  <h1>How AI-generated is this website?</h1>
   <p class="lede">
     Paste a URL. We load it in a real headless browser, analyze the DOM, and score it against
     16 deterministic AI design patterns like vibe purple, gradients, FAQ accordions, 1·2·3 steps, and headline badges.
@@ -134,10 +134,7 @@
     <button type="submit" id="submit">Scan</button>
   </form>
   <div class="examples">
-    Try
-    <button data-url="https://news.ycombinator.com/">news.ycombinator.com</button>
-    <button data-url="https://stripe.com">stripe.com</button>
-    <button data-url="https://vercel.com">vercel.com</button>
+    <button id="random" type="button">Try a random website (Show HN)</button>
   </div>
 
   <div class="results" id="results"></div>
@@ -155,8 +152,13 @@ const form = $('#form'), urlInput = $('#url'), submit = $('#submit');
 const results = $('#results');
 const zoom = $('#zoom'), zoomImg = $('#zoomImg');
 
-document.querySelectorAll('.examples button').forEach(b =>
-  b.addEventListener('click', () => { urlInput.value = b.dataset.url; form.requestSubmit(); }));
+document.getElementById('random').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/random');
+    const d = await r.json();
+    if (d.url) { urlInput.value = d.url; form.requestSubmit(); }
+  } catch (e) { /* ignore; user can paste a URL manually */ }
+});
 
 // screenshots are added dynamically, so delegate the zoom click
 results.addEventListener('click', e => {

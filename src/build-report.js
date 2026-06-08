@@ -281,7 +281,7 @@ const html = `<!doctype html>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="brand"><a href="https://github.com/AdrianKrebs/ai-design-checker" target="_blank">AI Design Checker</a></span>
+    <span class="brand"><a href="/" title="Back to the checker">AI Design Checker</a></span>
     <span class="right">
       <a href="https://www.adriankrebs.ch/blog/design-slop/" target="_blank">Methodology</a>
       <span class="sep">|</span>

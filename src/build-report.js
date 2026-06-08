@@ -264,6 +264,16 @@ const html = `<!doctype html>
   .item .title-line a.t { font-size: 19px; }
   .item .subtext { font-size: 14px; }
   .more { padding: 16px 0 8px; }
+
+  /* Severity as a tinted GOV.UK-style badge, not just coloured text. */
+  .item .subtext .tier { display: inline-block; font-weight: 700; font-size: 11px; letter-spacing: .03em; text-transform: uppercase; padding: 2px 7px 1px; }
+  .item .subtext .tier-heavy { color: #942514; background: #f6d7d2; }
+  .item .subtext .tier-mild  { color: #594d00; background: #fff7bf; }
+  .item .subtext .tier-clean { color: #005a30; background: #cce2d8; }
+  /* Flagged patterns: quiet grey tags (still click-to-filter), not a wall of links. */
+  .item .subtext .flag { color: #505a5f; text-decoration: none; }
+  .item .subtext .flag:hover { color: #0b0c0c; text-decoration: underline; }
+  .item .subtext .flag.active { color: #942514; font-weight: 700; }
 </style>
 </head>
 <body>

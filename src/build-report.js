@@ -289,9 +289,9 @@ const html = `<!doctype html>
         <h2 class="facet-h">Tier</h2>
         <ul class="facet-list">
           <li><a class="filter" data-tier="" href="#all">All <span class="fc">${total}</span></a></li>
-          <li><a class="filter" data-tier="Heavy" href="#heavy">Slop <span class="fc">${tierCount.Heavy}</span></a></li>
-          <li><a class="filter" data-tier="Mild" href="#mild">Medium <span class="fc">${tierCount.Mild}</span></a></li>
-          <li><a class="filter" data-tier="Clean" href="#clean">Clean <span class="fc">${tierCount.Clean}</span></a></li>
+          <li><a class="filter" data-tier="Heavy" href="#heavy">Heavy <span class="fc">${tierCount.Heavy} (${(100 * tierCount.Heavy / total).toFixed(0)}%)</span></a></li>
+          <li><a class="filter" data-tier="Mild" href="#mild">Some <span class="fc">${tierCount.Mild} (${(100 * tierCount.Mild / total).toFixed(0)}%)</span></a></li>
+          <li><a class="filter" data-tier="Clean" href="#clean">Clean <span class="fc">${tierCount.Clean} (${(100 * tierCount.Clean / total).toFixed(0)}%)</span></a></li>
         </ul>
       </div>
       <details class="freq facet">
@@ -318,7 +318,7 @@ const data = ${JSON.stringify(data)};
 const patternLabel = Object.fromEntries(data.patternMeta.map(p => [p.id, p.shortLabel || p.label || p.id]));
 const TIER_HASH = { heavy: 'Heavy', mild: 'Mild', clean: 'Clean', all: null, '': null };
 const TIER_CLASS = { Heavy: 'tier-heavy', Mild: 'tier-mild', Clean: 'tier-clean' };
-const TIER_DISPLAY = { Heavy: 'Slop', Mild: 'Medium', Clean: 'Clean' };
+const TIER_DISPLAY = { Heavy: 'Heavy', Mild: 'Some', Clean: 'Clean' };
 
 const SORT_KEYS = new Set(['date', 'score', 'points', 'flagged']);
 const PAGE_SIZE = 30;
@@ -384,7 +384,9 @@ function renderBanner(filteredCount) {
     const label = patternLabel[activePattern] || activePattern;
     left = \`<span class="label">filtering by pattern:</span> <span class="pat-name">\${escape(label)}</span> <a class="clear-btn" href="#" id="clear-pattern">× clear</a>\`;
   }
-  banner.innerHTML = \`\${left}\${sortLinksHTML()}<span class="count">\${sites}</span>\`;
+  // Counts live in the sidebar tier facet now; the results header is just the
+  // sort row (+ the active-pattern chip when a pattern filter is on).
+  banner.innerHTML = \`\${left}\${sortLinksHTML()}\`;
   if (activePattern) {
     document.getElementById('clear-pattern').addEventListener('click', e => {
       e.preventDefault();

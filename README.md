@@ -103,7 +103,7 @@ The full rule for each pattern lives in `src/patterns/<id>.js`.
 
 ```
 score = round(100 × patternsFlagged / patternsTotal)
-tier  = ≥4 Slop · 2–3 Medium · 0–1 Clean
+tier  = ≥4 Heavy · 2–3 Some · 0–1 Clean
 ```
 
 ## Tools

@@ -301,7 +301,6 @@ const html = `<!doctype html>
     </aside>
 
     <section class="finder-results">
-      <p class="intro">Show HN submissions scored against deterministic AI design patterns.</p>
       <div class="active-banner" id="banner"></div>
       <div class="list" id="grid"></div>
       <div class="more" id="more"></div>
